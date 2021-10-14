@@ -8,6 +8,12 @@
   vars_files:
     - vars/main.yaml
   tasks:
+    - name: create nginx repo definition
+      copy: 
+        src: nginx.repo
+        dest: /etc/yum.repos.d/nginx.repo
+
+
     - name: install nginx
       yum:
         name: nginx
