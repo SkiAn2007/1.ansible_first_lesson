@@ -1,6 +1,6 @@
 ---
 - name: stop containers
-  hosts: webserver
+  hosts: nodes
   gather_facts: true
   vars:
     containers: ["webmario", "webdoom"]

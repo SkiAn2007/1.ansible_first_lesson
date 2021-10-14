@@ -1,6 +1,6 @@
 ---
 - name: configure webserver without tls
-  hosts: webserver
+  hosts: nodes
   gather_facts: true
   become: true
   vars:
