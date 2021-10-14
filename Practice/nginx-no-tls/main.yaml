@@ -1,0 +1,69 @@
+---
+- name: configure webserver without tls
+  hosts: webserver
+  gather_facts: true
+  become: true
+  vars:
+    server_name: localhost
+  vars_files:
+    - vars/main.yaml
+  tasks:
+    - name: install nginx
+      yum:
+        name: nginx
+        update_cache: true
+        state: present
+
+    - name: copy main nginx config file
+      copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart nginx
+
+    - name: copy site's nginx config file
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/conf.d/notls.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart nginx
+
+    - name: copy index.html
+      template:
+        src: templates/index.html.j2
+        dest: /usr/share/nginx/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart nginx
+
+    - name: ensure nginx is started
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: insert firewalld rule for nginx
+      firewalld:
+        port: 80/tcp
+        permanent: true
+        state: enabled
+        immediate: true
+      ignore_errors: true
+
+    - name: Check web site from web server
+      uri:
+        url: "http://{{ ansible_fqdn }}"
+        return_content: true
+      register: example_webpage
+      failed_when: example_webpage.status != 200
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

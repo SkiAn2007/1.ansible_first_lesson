@@ -1,0 +1,75 @@
+---
+- name: install docker and run doom
+  hosts: nodes
+  gather_facts: true
+  # debugger: on_failed
+  become: true
+  vars:
+    mario: true
+    mario_port: 9999
+    doom: true
+    doom_port: 8888
+  tasks:
+    - name: add package for docker install
+      yum:
+        name:
+          - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-libs-3.6.1-4.el7.x86_64.rpm"
+          - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/slirp4netns-0.4.3-4.el7_8.x86_64.rpm"
+          - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm"
+
+    - name: add docker repo
+      get_url:
+        url: "https://download.docker.com/linux/centos/docker-ce.repo"
+        dest: '/etc/yum.repos.d/docker-ce.repo'
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: install docker-ce and python2-pip
+      yum:
+        name:
+          - docker-ce
+          - python2-pip
+        update_cache: true
+
+    - name: install docker-py + particular version of websocket
+      pip:
+        executable: /usr/bin/pip2
+        name:
+          - docker-py
+          - websocket-client==0.32.0
+
+    - name: ensure docker is started
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    # Долгий этап. Скачка образа из dockerhub
+    - name: run webdoom
+      community.docker.docker_container:
+        name: webdoom
+        image: "jakolehm/http-doom:0.1.0"
+        # image: "mattipaksula/http-doom:latest"
+        ports:
+          - "{{ doom_port }}:8080"
+      when: doom
+
+    # Долгий этап. Скачка образа из dockerhub
+    - name: run web mario
+      community.docker.docker_container:
+        name: webmario
+        image: kaminskypavel/mario
+        ports:
+          - "{{ mario_port }}:8080"
+      when: mario
+
+    - name: print doom url
+      debug:
+        msg: "http://{{ inventory_hostname }}:{{ doom_port }}"
+      when: doom
+
+    - name: print mario url
+      debug:
+        msg: "http://{{ inventory_hostname }}:{{ mario_port }}"
+      when: mario
