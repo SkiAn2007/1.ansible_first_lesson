@@ -1,0 +1,16 @@
+---
+- name: Play with two tasks, one uses privilege escalation
+  hosts: all
+  become: false
+  gather_facts: true
+  tasks:
+  - name: This task needs privileges
+    yum:
+      name: perl
+      state: installed
+    become: true
+
+  - name: This task does not need privileges
+    shell: perl -v
+    register: perlcheck
+    failed_when: perlcheck.rc != 0
