@@ -63,6 +63,7 @@
         immediate: true
       ignore_errors: true
 
+  post_tasks:
     - name: Check web site from web server
       uri:
         url: "http://{{ ansible_fqdn }}"
