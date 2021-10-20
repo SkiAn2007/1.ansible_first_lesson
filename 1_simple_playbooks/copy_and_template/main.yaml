@@ -1,0 +1,24 @@
+---
+- name: copy files to remote host
+  hosts: nodes
+  vars:
+    custom_var: ansible
+    user_home_dir: /home/ansible
+  vars_files:
+      - vars/main.yaml
+  tasks:
+    - name: copy file from files directory
+      copy:
+        src: sample_file.txt
+        dest: "{{ user_home_dir }}/sample_file.txt"
+        owner: ansible
+        group: ansible
+        mode: 0644
+    
+    - name: copy file from template
+      template: 
+        src: templates/file_from_template.txt.j2
+        dest: "{{ user_home_dir }}/file_from_template.txt"
+        owner: ansible
+        group: ansible
+        mode: 0644
