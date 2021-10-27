@@ -1,6 +1,6 @@
 ---
 - name: Play with two tasks, one uses privilege escalation
-  hosts: all
+  hosts: nodes
   become: false
   gather_facts: true
   tasks:

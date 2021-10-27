@@ -1,26 +1,26 @@
 ---
-- name: Become the user "root"
+- name: 1. Become the user "root"
   hosts: nodes
   become: true
   gather_facts: true
   tasks:
-    - name: Show the user used by this play
+    - name: 1. Show the user used by this play
       debug:
         var: ansible_user_id
 
-- name: Do not use privilege escalation
+- name: 2. Do not use privilege escalation
   hosts: nodes
   become: false
   gather_facts: true
   tasks:
-    - name: Show the user used by this play
+    - name: 2. Show the user used by this play
       debug:
         var: ansible_user_id
 
-- name: Use privilege escalation based on defaults
+- name: 3. Use privilege escalation based on defaults
   hosts: nodes
   gather_facts: true
   tasks:
-    - name: Show the user used by this play
+    - name: 3. Show the user used by this play
       debug:
         var: ansible_user_id
