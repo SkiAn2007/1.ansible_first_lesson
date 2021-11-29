@@ -14,9 +14,7 @@
       yum:
         name:
           - "epel-release"
-          # - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-libs-3.6.1-4.el7.x86_64.rpm"
-          # - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/slirp4netns-0.4.3-4.el7_8.x86_64.rpm"
-          # - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm"
+        state: present
 
     - name: add docker repo
       get_url:
