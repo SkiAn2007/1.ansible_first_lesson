@@ -10,12 +10,6 @@
     doom: true
     doom_port: 8888
   tasks:
-    - name: add package for docker and python2-pip install
-      yum:
-        name:
-          - "epel-release"
-        state: present
-
     - name: add docker repo
       get_url:
         url: "https://download.docker.com/linux/centos/docker-ce.repo"
@@ -24,11 +18,18 @@
         group: root
         mode: 0644
 
+    - name: install epel-release for repos with python2-pip
+      yum:
+        name:
+          - epel-release
+        state: present
+
     - name: install docker-ce and python2-pip
       yum:
         name:
           - docker-ce
           - python2-pip
+        state: present
         update_cache: true
 
     - name: install docker-py + particular version of websocket
