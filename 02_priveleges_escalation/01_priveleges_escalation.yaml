@@ -1,4 +1,5 @@
 ---
+# this play uses become: true
 - name: 1. Become the user "root"
   hosts: nodes
   become: true
@@ -8,6 +9,7 @@
       debug:
         var: ansible_user_id
 
+# this play uses become: false
 - name: 2. Do not use privilege escalation
   hosts: nodes
   become: false
@@ -17,6 +19,7 @@
       debug:
         var: ansible_user_id
 
+# this play uses default setting
 - name: 3. Use privilege escalation based on defaults
   hosts: nodes
   gather_facts: true
