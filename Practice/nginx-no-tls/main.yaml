@@ -4,9 +4,7 @@
   gather_facts: true
   become: true
   vars:
-    server_name: ansible-node1
-  vars_files:
-    - vars/main.yaml
+    nginx_port_no_tls: 80
   tasks:
     - name: create nginx repo definition
       copy:
