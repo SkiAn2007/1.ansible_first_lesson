@@ -10,14 +10,6 @@
     doom: true
     doom_port: 8888
   tasks:
-    - name: add package for docker and python2-pip install
-      yum:
-        name:
-          - "epel-release"
-          # - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-libs-3.6.1-4.el7.x86_64.rpm"
-          # - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/slirp4netns-0.4.3-4.el7_8.x86_64.rpm"
-          # - "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm"
-
     - name: add docker repo
       get_url:
         url: "https://download.docker.com/linux/centos/docker-ce.repo"
@@ -26,11 +18,18 @@
         group: root
         mode: 0644
 
+    - name: install epel-release for repos with python2-pip
+      yum:
+        name:
+          - epel-release
+        state: present
+
     - name: install docker-ce and python2-pip
       yum:
         name:
           - docker-ce
           - python2-pip
+        state: present
         update_cache: true
 
     - name: install docker-py + particular version of websocket

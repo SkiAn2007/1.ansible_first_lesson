@@ -4,7 +4,7 @@
   gather_facts: true
   become: true
   vars:
-    server_name: localhost
+    server_name: ansible-node1
   vars_files:
     - vars/main.yaml
   tasks:
@@ -49,7 +49,7 @@
         mode: 0644
       notify: restart nginx
 
-    - name: ensure nginx is started
+    - name: ensure nginx is enabled and started
       service:
         name: nginx
         state: started
@@ -57,27 +57,20 @@
 
     - name: insert firewalld rule for nginx
       firewalld:
-        port: 80/tcp
+        port: "{{ nginx_port_no_tls }}/tcp"
         permanent: true
         state: enabled
         immediate: true
       ignore_errors: true
 
   post_tasks:
-    - name: Check web site from web server
-      uri:
-        url: "http://{{ ansible_fqdn }}"
-        return_content: true
-      register: example_webpage
-      failed_when: example_webpage.status != 200
-
     - name: check web site from control server
       uri:
-        url: "http://{{ ansible_host }}:8080"
+        url: "http://{{ ansible_host }}:{{ nginx_port_no_tls }}"
         return_content: true
+      connection: local
       register: example_webpage_out
       failed_when: example_webpage_out.status != 200
-      connection: local
 
   handlers:
     - name: restart nginx
