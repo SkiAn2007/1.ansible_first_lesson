@@ -9,7 +9,7 @@
     - vars/main.yaml
   tasks:
     - name: create nginx repo definition
-      copy: 
+      copy:
         src: nginx.repo
         dest: /etc/yum.repos.d/nginx.repo
         owner: root
@@ -70,6 +70,14 @@
         return_content: true
       register: example_webpage
       failed_when: example_webpage.status != 200
+
+    - name: check web site from control server
+      uri:
+        url: "http://{{ ansible_host }}:8080"
+        return_content: true
+      register: example_webpage_out
+      failed_when: example_webpage_out.status != 200
+      connection: local
 
   handlers:
     - name: restart nginx
