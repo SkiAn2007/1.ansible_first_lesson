@@ -1,0 +1,21 @@
+all:
+  hosts:
+    server0.localdomain
+  children:
+    db:
+      hosts:
+        server1.localdomain:
+        server2.localdomain:
+    balancer:
+      hosts:
+        server3.localdomain:
+        server4.localdomain:
+    test_servers:
+      hosts:
+        server5.localdomain:
+    prod_servers:
+      hosts:
+        server[6:7].localdomain:
+      children:
+        db:
+        balancer:

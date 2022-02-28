@@ -1,0 +1,18 @@
+---
+- name: check inventory
+  hosts: all
+  gather_facts: true
+  connection: local
+  tasks:
+    - name: show inventory_hostname
+      debug:
+        var: inventory_hostname
+
+    - name: List of groups the current host is part of
+      debug:
+        var: group_names
+
+    - name: A dictionary/map with all the groups in inventory and each group has the list of hosts that belong to it
+      run_once: true
+      debug:
+        var: groups

@@ -1,0 +1,19 @@
+---
+- name: Check inventory's group_vars
+  hosts: all
+  gather_facts: true
+  connection: local
+  tasks:
+    - name: show inventory_hostname
+      debug:
+        var: inventory_hostname
+
+    - name: print server's stage if defined
+      debug:
+        var: stage
+      when: stage is defined
+
+    - name: print server's type if defined
+      debug:
+        var: servertype
+      when: servertype is defined

@@ -1,0 +1,10 @@
+all:
+  hosts:
+    server0.localdomain
+  children:
+    test_servers:
+      hosts:
+        server1.localdomain:
+    prod_servers:
+      hosts:
+        server[2:3].localdomain:
