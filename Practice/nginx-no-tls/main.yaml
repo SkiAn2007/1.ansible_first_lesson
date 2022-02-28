@@ -1,10 +1,12 @@
 ---
-- name: configure webserver without tls
+- name: configure webserver with tls
   hosts: nodes
   gather_facts: true
   become: true
   vars:
-    nginx_port_no_tls: 80
+    nginx_port_tls: 443
+    ssl_certificate: "/etc/nginx/{{ ansible_host }}.pem"
+    ssl_certificate_key: "/etc/nginx/{{ ansible_host }}.key"
   tasks:
     - name: create nginx repo definition
       copy:
@@ -19,6 +21,58 @@
         name: nginx
         update_cache: true
         state: present
+
+    - name: install libselinux-python3
+      yum:
+        name: libselinux-python3
+        update_cache: true
+        state: present
+
+    - name: install setuptools-rust for crypto lib
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+      pip:
+        name: setuptools-rust
+
+    - name: upgrade pip
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+      pip:
+        name: pip
+        extra_args: --upgrade
+
+    - name: install crypto lib to satisfy req. for generating cert
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+      pip:
+        name: cryptography
+
+    - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+      community.crypto.openssl_privatekey:
+        path: "{{ ssl_certificate_key }}"
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+
+    - name: Create certificate signing request (CSR) for self-signed certificate
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ ssl_certificate_key }}"
+        common_name: "{{ ansible_host }}"
+        organization_name: Andrey Skipin
+        subject_alt_name:
+          - "DNS:{{ ansible_host }}"
+          - "DNS:www.{{ ansible_host }}"
+      register: csr
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+
+    - name: Create self-signed certificate from CSR
+      community.crypto.x509_certificate:
+        path: "{{ ssl_certificate }}"
+        csr_content: "{{ csr.csr }}"
+        privatekey_path: "{{ ssl_certificate_key }}"
+        provider: selfsigned
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
 
     - name: copy main nginx config file
       copy:
@@ -55,7 +109,7 @@
 
     - name: insert firewalld rule for nginx
       firewalld:
-        port: "{{ nginx_port_no_tls }}/tcp"
+        port: "{{ nginx_port_tls }}/tcp"
         permanent: true
         state: enabled
         immediate: true
@@ -64,8 +118,9 @@
   post_tasks:
     - name: check web site from control server
       uri:
-        url: "http://{{ ansible_host }}:{{ nginx_port_no_tls }}"
+        url: "https://{{ ansible_host }}:{{ nginx_port_tls }}"
         return_content: true
+        validate_certs: false   # as far as we use self signed
       connection: local
       register: example_webpage_out
       failed_when: example_webpage_out.status != 200
